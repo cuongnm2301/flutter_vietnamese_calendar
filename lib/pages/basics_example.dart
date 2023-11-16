@@ -10,10 +10,10 @@ class TableBasicsExample extends StatefulWidget {
   const TableBasicsExample({super.key});
 
   @override
-  _TableBasicsExampleState createState() => _TableBasicsExampleState();
+  TableBasicsExampleState createState() => TableBasicsExampleState();
 }
 
-class _TableBasicsExampleState extends State<TableBasicsExample> {
+class TableBasicsExampleState extends State<TableBasicsExample> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -21,9 +21,6 @@ class _TableBasicsExampleState extends State<TableBasicsExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('TableCalendar - Basics'),
-      ),
       body: TableCalendar(
         firstDay: kFirstDay,
         lastDay: kLastDay,

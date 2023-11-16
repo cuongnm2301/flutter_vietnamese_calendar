@@ -2,91 +2,151 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import 'package:flutter/material.dart';
+import 'package:flutter_vietnamese_calendar/utils.dart';
 import 'package:intl/date_symbol_data_local.dart';
-
-import 'pages/basics_example.dart';
+import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 void main() {
-  initializeDateFormatting().then((_) => runApp(const MyApp()));
+  initializeDateFormatting().then((_) => runApp(const MainScreen()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MainScreen extends StatelessWidget {
+  const MainScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TableCalendar Example',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const StartPage(),
+      home: const HomePage(),
     );
   }
 }
 
-class StartPage extends StatefulWidget {
-  const StartPage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  _StartPageState createState() => _StartPageState();
+  MainCalendar createState() => MainCalendar();
 }
 
-class _StartPageState extends State<StartPage> {
+class MainCalendar extends State<HomePage> {
+  late PageController _pageController;
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  final ValueNotifier<DateTime> _focusedDay = ValueNotifier(DateTime.now());
+  DateTime? _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _focusedDay.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TableCalendar Example'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 20.0),
-            ElevatedButton(
-              child: const Text('Basics'),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const TableBasicsExample()),
-              ),
-            ),
-            const SizedBox(height: 12.0),
-            ElevatedButton(
-              child: const Text('Range Selection'),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const TableBasicsExample()),
-              ),
-            ),
-            const SizedBox(height: 12.0),
-            ElevatedButton(
-              child: const Text('Events'),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const TableBasicsExample()),
-              ),
-            ),
-            const SizedBox(height: 12.0),
-            ElevatedButton(
-              child: const Text('Multiple Selection'),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const TableBasicsExample()),
-              ),
-            ),
-            const SizedBox(height: 12.0),
-            ElevatedButton(
-              child: const Text('Complex'),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const TableBasicsExample()),
-              ),
-            ),
-            const SizedBox(height: 20.0),
-          ],
+        title: ValueListenableBuilder<DateTime>(
+          valueListenable: _focusedDay,
+          builder: (context, value, _) {
+            return MonthDisplayWidget(
+              day: value,
+              onPreviousMonth: () => {
+                _pageController.previousPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                )
+              },
+              onNextMonth: () => {
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                )
+              },
+            );
+          },
         ),
       ),
+      body: TableCalendar(
+        firstDay: kFirstDay,
+        lastDay: kLastDay,
+        focusedDay: _focusedDay.value,
+        calendarFormat: _calendarFormat,
+        selectedDayPredicate: (day) {
+          return isSameDay(_selectedDay, day);
+        },
+        onCalendarCreated: (controller) => _pageController = controller,
+        onDaySelected: (selectedDay, focusedDay) {
+          if (!isSameDay(_selectedDay, selectedDay)) {
+            // Call `setState()` when updating the selected day
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay.value = focusedDay;
+            });
+          }
+        },
+        onFormatChanged: (format) {
+          if (_calendarFormat != format) {
+            // Call `setState()` when updating calendar format
+            setState(() {
+              _calendarFormat = format;
+            });
+          }
+        },
+        onPageChanged: (focusedDay) {
+          _focusedDay.value = focusedDay;
+        },
+        locale: 'vi_VN',
+        headerVisible: false,
+        startingDayOfWeek: StartingDayOfWeek.monday,
+      ),
+    );
+  }
+}
+
+class MonthDisplayWidget extends StatelessWidget {
+  final DateTime? day;
+  final VoidCallback onPreviousMonth;
+  final VoidCallback onNextMonth;
+
+  // Constructor
+  const MonthDisplayWidget({
+    Key? key,
+    required this.day,
+    required this.onPreviousMonth,
+    required this.onNextMonth,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    bool format = day!.year == DateTime.now().year;
+    String displayMonth = format
+        ? DateFormat.MMMM('vi_VN').format(day!)
+        : DateFormat.yMMM('vi_VN').format(day!);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_left),
+          onPressed: onPreviousMonth,
+        ),
+        Text(
+          displayMonth,
+          style: const TextStyle(fontSize: 24),
+        ),
+        IconButton(
+          icon: const Icon(Icons.arrow_right),
+          onPressed: onNextMonth,
+        ),
+      ],
     );
   }
 }
