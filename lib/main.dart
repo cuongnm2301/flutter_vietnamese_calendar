@@ -52,62 +52,113 @@ class MainCalendar extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: ValueListenableBuilder<DateTime>(
-          valueListenable: _focusedDay,
-          builder: (context, value, _) {
-            return MonthDisplayWidget(
-              day: value,
-              onPreviousMonth: () => {
-                _pageController.previousPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                )
-              },
-              onNextMonth: () => {
-                _pageController.nextPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                )
-              },
-            );
-          },
+        appBar: AppBar(
+          title: ValueListenableBuilder<DateTime>(
+            valueListenable: _focusedDay,
+            builder: (context, value, _) {
+              return MonthDisplayWidget(
+                day: value,
+                onPreviousMonth: () => {
+                  _pageController.previousPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                  )
+                },
+                onNextMonth: () => {
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                  )
+                },
+              );
+            },
+          ),
         ),
-      ),
-      body: TableCalendar(
-        firstDay: kFirstDay,
-        lastDay: kLastDay,
-        focusedDay: _focusedDay.value,
-        calendarFormat: _calendarFormat,
-        selectedDayPredicate: (day) {
-          return isSameDay(_selectedDay, day);
-        },
-        onCalendarCreated: (controller) => _pageController = controller,
-        onDaySelected: (selectedDay, focusedDay) {
-          if (!isSameDay(_selectedDay, selectedDay)) {
-            // Call `setState()` when updating the selected day
-            setState(() {
-              _selectedDay = selectedDay;
-              _focusedDay.value = focusedDay;
-            });
-          }
-        },
-        onFormatChanged: (format) {
-          if (_calendarFormat != format) {
-            // Call `setState()` when updating calendar format
-            setState(() {
-              _calendarFormat = format;
-            });
-          }
-        },
-        onPageChanged: (focusedDay) {
-          _focusedDay.value = focusedDay;
-        },
-        locale: 'vi_VN',
-        headerVisible: false,
-        startingDayOfWeek: StartingDayOfWeek.monday,
-      ),
-    );
+        body: SingleChildScrollView(
+          child: Column(children: <Widget>[
+            SizedBox(
+              child: TableCalendar(
+                rowHeight: 100,
+                daysOfWeekHeight: 50,
+                firstDay: kFirstDay,
+                lastDay: kLastDay,
+                focusedDay: _focusedDay.value,
+                calendarFormat: _calendarFormat,
+                selectedDayPredicate: (day) {
+                  return isSameDay(_selectedDay, day);
+                },
+                onCalendarCreated: (controller) => _pageController = controller,
+                onDaySelected: (selectedDay, focusedDay) {
+                  if (!isSameDay(_selectedDay, selectedDay)) {
+                    // Call `setState()` when updating the selected day
+                    setState(() {
+                      _selectedDay = selectedDay;
+                      _focusedDay.value = focusedDay;
+                    });
+                  }
+                },
+                onFormatChanged: (format) {
+                  if (_calendarFormat != format) {
+                    // Call `setState()` when updating calendar format
+                    setState(() {
+                      _calendarFormat = format;
+                    });
+                  }
+                },
+                onPageChanged: (focusedDay) {
+                  _focusedDay.value = focusedDay;
+                },
+                locale: 'vi_VN',
+                headerVisible: false,
+                startingDayOfWeek: StartingDayOfWeek.monday,
+                calendarBuilders: CalendarBuilders(
+                  defaultBuilder: (context, day, focusedDay) =>
+                      DateBuilderWidget(
+                    context: context,
+                    day: day,
+                    focusedDay: focusedDay,
+                  ),
+                  outsideBuilder: (context, day, focusedDay) =>
+                      DateBuilderWidget(
+                    context: context,
+                    day: day,
+                    focusedDay: focusedDay,
+                  ),
+                  // todayBuilder: (context, day, focusedDay) =>
+                  //     DateBuilderWidget(
+                  //       context: context,
+                  //       day: day,
+                  //       focusedDay: focusedDay,
+                  //     ),
+                  //     dowBuilder: (context, date) {
+                  //   String formattedDate = DateFormat('E', 'vi_VN').format(date);
+                  //   return Container(
+                  //     margin: const EdgeInsets.all(
+                  //         0.5), // Adjust margin for line thickness
+                  //     decoration: const BoxDecoration(
+                  //       border: Border(
+                  //           right: BorderSide(
+                  //               width: 1,
+                  //               color: Colors.grey)), // Line color and style
+                  //     ),
+                  //     child: Center(
+                  //       child: Text(
+                  //         formattedDate,
+                  //         style: const TextStyle().copyWith(fontSize: 16.0),
+                  //       ),
+                  //     ),
+                  //   );
+                  // }
+                  // Repeat similar builder for outsideBuilder, holidayBuilder, etc., if needed
+                ),
+                calendarStyle: CalendarStyle(
+                    tableBorder: TableBorder.all(width: 1, color: Colors.grey),
+                    tablePadding: const EdgeInsets.only(left: 12, right: 12),
+                    cellMargin: const EdgeInsets.all(0)),
+              ),
+            )
+          ]),
+        ));
   }
 }
 
@@ -147,6 +198,29 @@ class MonthDisplayWidget extends StatelessWidget {
           onPressed: onNextMonth,
         ),
       ],
+    );
+  }
+}
+
+class DateBuilderWidget extends StatelessWidget {
+  final BuildContext? context;
+  final DateTime day;
+  final DateTime focusedDay;
+
+  // Constructor
+  const DateBuilderWidget({
+    Key? key,
+    required this.context,
+    required this.day,
+    required this.focusedDay,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        '${day.day}',
+      ),
     );
   }
 }
