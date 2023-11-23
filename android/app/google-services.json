@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "751435728676",
+    "project_id": "vn-todo-calendar",
+    "storage_bucket": "vn-todo-calendar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:751435728676:android:49158631aa96d47b9855b1",
+        "android_client_info": {
+          "package_name": "com.example.flutter_vietnamese_calendar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlF0mrKb3yOYP6ngyhiu01rJ4kjbRugQs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:751435728676:android:f8ce91221fd590e89855b1",
+        "android_client_info": {
+          "package_name": "com.vn.vical"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlF0mrKb3yOYP6ngyhiu01rJ4kjbRugQs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

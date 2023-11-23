@@ -1,4 +1,4 @@
-# flutter_vietnamese_calendar
+# vical
 
 A new Flutter project.
 

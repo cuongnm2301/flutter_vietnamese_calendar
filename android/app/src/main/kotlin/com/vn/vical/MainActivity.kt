@@ -1,4 +1,4 @@
-package com.example.flutter_vietnamese_calendar
+package com.vn.vical
 
 import io.flutter.embedding.android.FlutterActivity
 

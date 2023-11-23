@@ -2,12 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import 'package:flutter/material.dart';
-import 'package:flutter_vietnamese_calendar/utils.dart';
+import 'package:vical/pages/home_calendar.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:intl/intl.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   initializeDateFormatting().then((_) => runApp(const MainScreen()));
 }
 
@@ -18,208 +23,79 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        // Define the default brightness and colors.
+        primaryColor: Colors.pink,
+        hintColor: Colors.red,
+        scaffoldBackgroundColor: Colors.white,
+
+        // Define the default TextTheme. Use this to specify the default
+        // text styling for headlines, titles, bodies of text, and more.
+        textTheme: GoogleFonts.pacificoTextTheme(
+          Theme.of(context).textTheme,
+        ),
+
+        // Define the default button theme.
+        buttonTheme: const ButtonThemeData(
+          buttonColor: Colors.pink,
+          textTheme: ButtonTextTheme.primary,
+        ),
+
+        // Other theme settings...
       ),
-      home: const HomePage(),
+      home: const CustomTabBarScreen(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class CustomTabBarScreen extends StatefulWidget {
+  const CustomTabBarScreen({super.key});
 
   @override
-  MainCalendar createState() => MainCalendar();
+  CustomTabBarScreenState createState() => CustomTabBarScreenState();
 }
 
-class MainCalendar extends State<HomePage> {
-  late PageController _pageController;
-  CalendarFormat _calendarFormat = CalendarFormat.month;
-  final ValueNotifier<DateTime> _focusedDay = ValueNotifier(DateTime.now());
-  DateTime? _selectedDay;
+class CustomTabBarScreenState extends State<CustomTabBarScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _focusedDay.dispose();
-    super.dispose();
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: ValueListenableBuilder<DateTime>(
-            valueListenable: _focusedDay,
-            builder: (context, value, _) {
-              return MonthDisplayWidget(
-                day: value,
-                onPreviousMonth: () => {
-                  _pageController.previousPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  )
-                },
-                onNextMonth: () => {
-                  _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  )
-                },
-              );
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          const HomeCalendar(),
+          Container(), // Placeholder for the center tab
+          const Center(child: Text('Settings')),
+        ],
+      ),
+      floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: FloatingActionButton(
+            onPressed: () {
+              // Action for the button
             },
-          ),
+            shape: const CircleBorder(side: BorderSide.none),
+            child: const Icon(Icons.add),
+          )),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 10.0,
+        child: TabBar(
+          controller: _tabController,
+          tabs: [
+            const Tab(icon: Icon(Icons.calendar_today)),
+            Tab(icon: Container()),
+            const Tab(icon: Icon(Icons.settings)),
+          ],
         ),
-        body: SingleChildScrollView(
-          child: Column(children: <Widget>[
-            SizedBox(
-              child: TableCalendar(
-                rowHeight: 100,
-                daysOfWeekHeight: 50,
-                firstDay: kFirstDay,
-                lastDay: kLastDay,
-                focusedDay: _focusedDay.value,
-                calendarFormat: _calendarFormat,
-                selectedDayPredicate: (day) {
-                  return isSameDay(_selectedDay, day);
-                },
-                onCalendarCreated: (controller) => _pageController = controller,
-                onDaySelected: (selectedDay, focusedDay) {
-                  if (!isSameDay(_selectedDay, selectedDay)) {
-                    // Call `setState()` when updating the selected day
-                    setState(() {
-                      _selectedDay = selectedDay;
-                      _focusedDay.value = focusedDay;
-                    });
-                  }
-                },
-                onFormatChanged: (format) {
-                  if (_calendarFormat != format) {
-                    // Call `setState()` when updating calendar format
-                    setState(() {
-                      _calendarFormat = format;
-                    });
-                  }
-                },
-                onPageChanged: (focusedDay) {
-                  _focusedDay.value = focusedDay;
-                },
-                locale: 'vi_VN',
-                headerVisible: false,
-                startingDayOfWeek: StartingDayOfWeek.monday,
-                calendarBuilders: CalendarBuilders(
-                  defaultBuilder: (context, day, focusedDay) =>
-                      DateBuilderWidget(
-                    context: context,
-                    day: day,
-                    focusedDay: focusedDay,
-                  ),
-                  outsideBuilder: (context, day, focusedDay) =>
-                      DateBuilderWidget(
-                    context: context,
-                    day: day,
-                    focusedDay: focusedDay,
-                  ),
-                  // todayBuilder: (context, day, focusedDay) =>
-                  //     DateBuilderWidget(
-                  //       context: context,
-                  //       day: day,
-                  //       focusedDay: focusedDay,
-                  //     ),
-                  //     dowBuilder: (context, date) {
-                  //   String formattedDate = DateFormat('E', 'vi_VN').format(date);
-                  //   return Container(
-                  //     margin: const EdgeInsets.all(
-                  //         0.5), // Adjust margin for line thickness
-                  //     decoration: const BoxDecoration(
-                  //       border: Border(
-                  //           right: BorderSide(
-                  //               width: 1,
-                  //               color: Colors.grey)), // Line color and style
-                  //     ),
-                  //     child: Center(
-                  //       child: Text(
-                  //         formattedDate,
-                  //         style: const TextStyle().copyWith(fontSize: 16.0),
-                  //       ),
-                  //     ),
-                  //   );
-                  // }
-                  // Repeat similar builder for outsideBuilder, holidayBuilder, etc., if needed
-                ),
-                calendarStyle: CalendarStyle(
-                    tableBorder: TableBorder.all(width: 1, color: Colors.grey),
-                    tablePadding: const EdgeInsets.only(left: 12, right: 12),
-                    cellMargin: const EdgeInsets.all(0)),
-              ),
-            )
-          ]),
-        ));
-  }
-}
-
-class MonthDisplayWidget extends StatelessWidget {
-  final DateTime? day;
-  final VoidCallback onPreviousMonth;
-  final VoidCallback onNextMonth;
-
-  // Constructor
-  const MonthDisplayWidget({
-    Key? key,
-    required this.day,
-    required this.onPreviousMonth,
-    required this.onNextMonth,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    bool format = day!.year == DateTime.now().year;
-    String displayMonth = format
-        ? DateFormat.MMMM('vi_VN').format(day!)
-        : DateFormat.yMMM('vi_VN').format(day!);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.arrow_left),
-          onPressed: onPreviousMonth,
-        ),
-        Text(
-          displayMonth,
-          style: const TextStyle(fontSize: 24),
-        ),
-        IconButton(
-          icon: const Icon(Icons.arrow_right),
-          onPressed: onNextMonth,
-        ),
-      ],
-    );
-  }
-}
-
-class DateBuilderWidget extends StatelessWidget {
-  final BuildContext? context;
-  final DateTime day;
-  final DateTime focusedDay;
-
-  // Constructor
-  const DateBuilderWidget({
-    Key? key,
-    required this.context,
-    required this.day,
-    required this.focusedDay,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        '${day.day}',
       ),
     );
   }
