@@ -1,4 +1,4 @@
-package com.vn.vical
+package vn.varian.vical
 
 import io.flutter.embedding.android.FlutterActivity
 

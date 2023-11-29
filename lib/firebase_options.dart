@@ -17,15 +17,24 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        return android;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for android - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -43,39 +52,12 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCNyi5z_Id5MwAZ6BxlcBS50ukFH-4VBDo',
-    appId: '1:751435728676:web:29d7cce26254ced69855b1',
-    messagingSenderId: '751435728676',
-    projectId: 'vn-todo-calendar',
-    authDomain: 'vn-todo-calendar.firebaseapp.com',
-    storageBucket: 'vn-todo-calendar.appspot.com',
-    measurementId: 'G-9C43ZQG79S',
-  );
-
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAlF0mrKb3yOYP6ngyhiu01rJ4kjbRugQs',
-    appId: '1:751435728676:android:f8ce91221fd590e89855b1',
-    messagingSenderId: '751435728676',
-    projectId: 'vn-todo-calendar',
-    storageBucket: 'vn-todo-calendar.appspot.com',
-  );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDIoto-4YoAdL45eTIMynH-00aMzENCN0c',
-    appId: '1:751435728676:ios:89391509780d17979855b1',
+    appId: '1:751435728676:ios:8b1fd80041883b009855b1',
     messagingSenderId: '751435728676',
     projectId: 'vn-todo-calendar',
     storageBucket: 'vn-todo-calendar.appspot.com',
-    iosBundleId: 'com.vn.vical',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDIoto-4YoAdL45eTIMynH-00aMzENCN0c',
-    appId: '1:751435728676:ios:ba04fe1a732f1e989855b1',
-    messagingSenderId: '751435728676',
-    projectId: 'vn-todo-calendar',
-    storageBucket: 'vn-todo-calendar.appspot.com',
-    iosBundleId: 'com.vn.vical.RunnerTests',
+    iosBundleId: 'vn.varian.vical',
   );
 }
